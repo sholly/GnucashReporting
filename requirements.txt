@@ -1,0 +1,3 @@
+mysqlclient==1.3.10
+piecash==0.12.0
+Flask==0.12.1
