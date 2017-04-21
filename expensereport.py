@@ -4,12 +4,14 @@ import configparser
 import json
 import decimal
 from piecash import Split, Transaction, Book
+from sqlalchemy.orm import joinedload
 
-username = "gnucash"
-password = "PhuckIt"
-host = "127.0.0.1"
-book = piecash.open_book(uri_conn="mysql://" + username + ":" + password + "@" +
-                                  host + ":3306/gnucash")
+
+# username = "gnucash"
+# password = "PhuckIt"
+# host = "127.0.0.1"
+# book = piecash.open_book(uri_conn="mysql://" + username + ":" + password + "@" +
+#                                   host + ":3306/gnucash")
 
 
 class PieCashConnectionManager():
@@ -38,18 +40,34 @@ class PieCashConnectionManager():
         return self.session
 
 
-class expensereport():
+class ExpenseSum():
+    def __init__(self, name, amount):
+        self.name = name
+        self.amount = amount
+
+    def addamount(self, amount):
+        self.amount += amount
+
+    def __repr__(self):
+        return self.name + ":" + str(self.amount)
+
+
+class ExpenseReport():
     def __init__(self, connMgr):
         self.connMgr = connMgr
+
     def getexpenses(self, startdate, enddate=datetime.datetime.now()):
         session = None
-        connMgr = PieCashConnectionManager('gnucash', 'PhuckIt', '127.0.0.1')
-        session = connMgr.getSession()
+        session = self.connMgr.getSession()
         expenses = {}
 
-
         print("start transactions query")
-        transactions = session.query(Transaction).filter(
+        # transactions = session.query(Transaction).filter(
+        #     Transaction.post_date >= startdate,
+        #     Transaction.post_date <= enddate
+        # ).all()
+        transactions = session.query(Transaction).\
+            options(joinedload('splits')).filter(
             Transaction.post_date >= startdate,
             Transaction.post_date <= enddate
         ).all()
@@ -66,17 +84,19 @@ class expensereport():
                     # print(split.value)
                     accountname = split.account.fullname
                     if accountname in expenses:
-                        expenses[accountname] += split.value
+                         expenses[accountname] += split.value
+                        #expenses[accountname].addamount(split.value)
                     else:
                         expenses[accountname] = split.value
+                        # expenses[accountname] = ExpenseSum(split.account.name, split.value)
         print("end summarizing expenses..")
 
         sortedexpenses = sorted(expenses.items(), key=lambda x: x[1], reverse=True)
-        #for e in sortedexpenses:
-        #    print(e)
-        #print("split count ", splitcount)
-        expensesjson = json.dumps(sortedexpenses, default=self.defaultencodedecimal, indent=4)
-        return expensesjson
+        # expensesjson = json.dumps(sortedexpenses, default=self.defaultencodedecimal)
+        # return expensesjson
+        print(type(sortedexpenses))
+        return sortedexpenses
+
     def defaultencodedecimal(self, o):
         if isinstance(o, decimal.Decimal):
             return str(o)
@@ -88,9 +108,12 @@ if __name__ == "__main__":
     connMgr = PieCashConnectionManager(config['development']['username'],
                                        config['development']['password'],
                                        config['development']['host'])
-    expensereport = expensereport(connMgr)
+    print(connMgr.connString)
+    expensereport = ExpenseReport(connMgr)
 
-    startdate = datetime.datetime.strptime("2015-01-01", "%Y-%m-%d")
-    enddate = datetime.datetime.strptime("2015-12-31", "%Y-%m-%d")
-    expensesjson = expensereport.getexpenses(startdate)
-    print(expensesjson)
+    startdate = datetime.datetime.strptime("2012-04-01", "%Y-%m-%d")
+    # enddate = datetime.datetime.strptime("2017-12-31", "%Y-%m-%d")
+    enddate = datetime.datetime.today()
+    expenses = expensereport.getexpenses(startdate, enddate)
+    for e in expenses:
+        print(e[0], str(e[1]))
