@@ -33,7 +33,7 @@ def get_expenses():
     if(request.args.get('startdate')is not None):
         startdate = datetime.datetime.strptime(request.args.get('startdate'), "%Y-%m-%d")
     else:
-        startdate = datetime.datetime.strptime("2017-04-01", "%Y-%m-%d")
+        startdate = datetime.datetime.strptime("2012-01-01", "%Y-%m-%d")
 
     if(request.args.get('enddate') is not None):
         enddate = datetime.datetime.strptime(request.args.get('enddate'), "%Y-%m-%d")

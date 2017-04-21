@@ -82,7 +82,7 @@ class ExpenseReport():
                 if (split.account.type == "EXPENSE"):
                     # print(split.account.fullname)
                     # print(split.value)
-                    accountname = split.account.fullname
+                    accountname = split.account.name
                     if accountname in expenses:
                          expenses[accountname] += split.value
                         #expenses[accountname].addamount(split.value)
