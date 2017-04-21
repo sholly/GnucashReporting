@@ -2,6 +2,7 @@ import datetime
 import piecash
 import configparser
 import json
+from json import JSONEncoder
 import decimal
 from piecash import Split, Transaction, Book
 from sqlalchemy.orm import joinedload
@@ -40,7 +41,7 @@ class PieCashConnectionManager():
         return self.session
 
 
-class ExpenseSum():
+class Expense():
     def __init__(self, name, amount):
         self.name = name
         self.amount = amount
@@ -49,7 +50,16 @@ class ExpenseSum():
         self.amount += amount
 
     def __repr__(self):
-        return self.name + ":" + str(self.amount)
+        return self.name + " " + str(self.amount)
+
+    def toJSON(self):
+        return {'name': self.name, 'amount': str(self.amount)}
+
+
+class ExpenseEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Expense):
+            return obj.toJSON();
 
 
 class ExpenseReport():
@@ -62,11 +72,7 @@ class ExpenseReport():
         expenses = {}
 
         print("start transactions query")
-        # transactions = session.query(Transaction).filter(
-        #     Transaction.post_date >= startdate,
-        #     Transaction.post_date <= enddate
-        # ).all()
-        transactions = session.query(Transaction).\
+        transactions = session.query(Transaction). \
             options(joinedload('splits')).filter(
             Transaction.post_date >= startdate,
             Transaction.post_date <= enddate
@@ -84,18 +90,24 @@ class ExpenseReport():
                     # print(split.value)
                     accountname = split.account.name
                     if accountname in expenses:
-                         expenses[accountname] += split.value
-                        #expenses[accountname].addamount(split.value)
+                        # expenses[accountname] += split.value
+                        expenses[accountname].addamount(split.value)
                     else:
-                        expenses[accountname] = split.value
-                        # expenses[accountname] = ExpenseSum(split.account.name, split.value)
+                        # expenses[accountname] = split.value
+                        expenses[accountname] = Expense(split.account.name, split.value)
         print("end summarizing expenses..")
 
-        sortedexpenses = sorted(expenses.items(), key=lambda x: x[1], reverse=True)
+        # sortedexpenses = sorted(expenses.items(), key=lambda x: x[1], reverse=True)
         # expensesjson = json.dumps(sortedexpenses, default=self.defaultencodedecimal)
         # return expensesjson
-        print(type(sortedexpenses))
-        return sortedexpenses
+        # print(type(sortedexpenses))
+        # return sortedexpenses
+
+        # for key, value in expenses.items():
+        #     print(value)
+
+        sortedexpenses = sorted(expenses.values(), key=lambda x: x.amount, reverse=True)
+        return sortedexpenses;
 
     def defaultencodedecimal(self, o):
         if isinstance(o, decimal.Decimal):
@@ -115,5 +127,5 @@ if __name__ == "__main__":
     # enddate = datetime.datetime.strptime("2017-12-31", "%Y-%m-%d")
     enddate = datetime.datetime.today()
     expenses = expensereport.getexpenses(startdate, enddate)
-    for e in expenses:
-        print(e[0], str(e[1]))
+
+    print(json.dumps(expenses, cls=ExpenseEncoder, indent=4))
