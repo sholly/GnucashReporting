@@ -8,13 +8,6 @@ from piecash import Split, Transaction, Book
 from sqlalchemy.orm import joinedload
 
 
-# username = "gnucash"
-# password = "PhuckIt"
-# host = "127.0.0.1"
-# book = piecash.open_book(uri_conn="mysql://" + username + ":" + password + "@" +
-#                                   host + ":3306/gnucash")
-
-
 class PieCashConnectionManager():
     def __init__(self, username, password, host, port='3306', database='gnucash'):
         self.username = username
@@ -67,7 +60,6 @@ class ExpenseReport():
         self.connMgr = connMgr
 
     def getexpenses(self, startdate, enddate=datetime.datetime.now()):
-        session = None
         session = self.connMgr.getSession()
         expenses = {}
 
@@ -79,7 +71,6 @@ class ExpenseReport():
         ).all()
         print("end transactions query")
 
-        # transactions.sort(key=lambda x: x.enter_date)
         print("start summarizing expenses..")
         splitcount = 0
         for t in transactions:
@@ -88,23 +79,14 @@ class ExpenseReport():
                 if (split.account.type == "EXPENSE"):
                     # print(split.account.fullname)
                     # print(split.value)
-                    accountname = split.account.name
+                    accountname = split.account.fullname
                     if accountname in expenses:
                         # expenses[accountname] += split.value
                         expenses[accountname].addamount(split.value)
                     else:
                         # expenses[accountname] = split.value
-                        expenses[accountname] = Expense(split.account.name, split.value)
+                        expenses[accountname] = Expense(accountname, split.value)
         print("end summarizing expenses..")
-
-        # sortedexpenses = sorted(expenses.items(), key=lambda x: x[1], reverse=True)
-        # expensesjson = json.dumps(sortedexpenses, default=self.defaultencodedecimal)
-        # return expensesjson
-        # print(type(sortedexpenses))
-        # return sortedexpenses
-
-        # for key, value in expenses.items():
-        #     print(value)
 
         sortedexpenses = sorted(expenses.values(), key=lambda x: x.amount, reverse=True)
         return sortedexpenses;
