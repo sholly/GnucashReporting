@@ -1,10 +1,11 @@
-import datetime
-import piecash
 import configparser
+import datetime
+import decimal
 import json
 from json import JSONEncoder
-import decimal
-from piecash import Split, Transaction, Book
+
+import piecash
+from piecash import Transaction
 from sqlalchemy.orm import joinedload
 
 
@@ -98,7 +99,7 @@ class ExpenseReport():
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
-    config.read('gnucashreporting.ini')
+    config.read('./gnucashreporting.ini')
     connMgr = PieCashConnectionManager(config['development']['username'],
                                        config['development']['password'],
                                        config['development']['host'])
@@ -106,8 +107,10 @@ if __name__ == "__main__":
     expensereport = ExpenseReport(connMgr)
 
     startdate = datetime.datetime.strptime("2012-04-01", "%Y-%m-%d")
-    # enddate = datetime.datetime.strptime("2017-12-31", "%Y-%m-%d")
     enddate = datetime.datetime.today()
     expenses = expensereport.getexpenses(startdate, enddate)
 
-    print(json.dumps(expenses, cls=ExpenseEncoder, indent=4))
+    #print(json.dumps(expenses, cls=ExpenseEncoder, indent=4))
+    for expense in expenses:
+        print(expense);
+

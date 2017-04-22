@@ -1,10 +1,13 @@
-from flask import Flask, jsonify, request
-import flask.json
-from flask_cors import CORS
 import configparser
 import datetime
 import decimal
+
+import flask.json
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+
 from expensereport import ExpenseReport, PieCashConnectionManager, Expense
+
 
 # api = Api(app)
 
@@ -59,4 +62,4 @@ def get_expenses():
 #        return {"expenses" : expensereport.getexpenses(startdate)}
 #api.add_resource(Expenses, '/expensereport')
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=False)
