@@ -22,4 +22,10 @@ services:
       - 5000:5000
     expose:
       - 5000
+#    volumes:
+#      - ./src:/app
+    environment:
+      - GNUCASHREPORTS_SETTINGS=/config/gnucashreports_settings.cfg
+    command:
+      python3 /app/flask_app.py
 

@@ -24,19 +24,20 @@ class FlaskExpenseEncoder(flask.json.JSONEncoder):
         return super(FlaskExpenseEncoder, self).default(obj)
 
 app = Flask(__name__)
+app.config.from_envvar('GNUCASHREPORTS_SETTINGS')
 CORS(app)
 app.json_encoder = FlaskExpenseEncoder
-def readconfig():
-    config = configparser.ConfigParser();
-    config.read('gnucashreporting.ini')
-    return config
+# def readconfig():
+#     config = configparser.ConfigParser();
+#     config.read('gnucashreporting.ini')
+#     return config
 
 @app.route('/expenses')
 def get_expenses():
-    config = readconfig()
-    connmgr = PieCashConnectionManager(config['development']['username'],
-                                       config['development']['password'],
-                                       config['development']['host'])
+    # config = readconfig()
+    connmgr = PieCashConnectionManager(app.config['DB_USERNAME'],
+                                        app.config['DB_PASSWORD'],
+                                       app.config['DB_HOST'])
     expensereport = ExpenseReport(connmgr)
 
     if(request.args.get('startdate')is not None):
@@ -62,4 +63,4 @@ def get_expenses():
 #        return {"expenses" : expensereport.getexpenses(startdate)}
 #api.add_resource(Expenses, '/expensereport')
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=True)
