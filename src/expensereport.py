@@ -1,7 +1,6 @@
 import configparser
 import datetime
 import decimal
-import json
 from json import JSONEncoder
 
 import piecash
