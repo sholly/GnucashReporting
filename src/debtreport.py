@@ -1,7 +1,7 @@
 import configparser
-
-import piecash
-from piecash import Account
+import datetime
+from sqlalchemy.orm import joinedload
+from piecash import Account, Transaction, Split
 from expensereport import PieCashConnectionManager
 
 
@@ -10,22 +10,21 @@ class DebtReport:
     def __init__(self, connMgr):
         self.connMgr = connMgr
 
-    def debttesting(self):
+    def accountsum(self, accountname, startdate):
         session = self.connMgr.getSession()
 
-        liabilityAccounts = session.query(Account).filter(
-            Account.type == "LIABILITY").all()
+        debttransactions = session.query(Transaction, Split, Account).\
+            filter(Transaction.guid == Split.transaction_guid,
+                   Split.account_guid == Account.guid,
+                   Account.name == accountname ,
+                   Transaction.post_date <= startdate).all()
 
-        for l in liabilityAccounts:
-            print(l.name)
 
-        book = self.connMgr.getBook()
-        creditAccounts = session.query(Account).filter(
-            Account.type == "CREDIT").all()
+        sum = 0;
 
-        for c in creditAccounts:
-            print(c.name)
-            print(c.sum())
+        for t in debttransactions:
+            sum += t[1].value
+        print(accountname, ",", sum)
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
@@ -35,5 +34,10 @@ if __name__ == "__main__":
                                        config['development']['host'])
 
     dr = DebtReport(connMgr)
-    dr.debttesting()
+    dr.accountsum("CU of CO Visa", datetime.datetime.today());
+    dr.accountsum("Lending Club", datetime.datetime.today());
+    dr.accountsum("Paypal", datetime.datetime.today());
+    dr.accountsum("AES Student Loan", datetime.datetime.today());
+    dr.accountsum("Nelnet Student Loan", datetime.datetime.today());
+    dr.accountsum("CU of CO Visa", datetime.datetime.strptime("2017-08-01", "%Y-%m-%d"));
 

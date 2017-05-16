@@ -63,28 +63,21 @@ class ExpenseReport():
         session = self.connMgr.getSession()
         expenses = {}
 
-        print("start transactions query")
         transactions = session.query(Transaction). \
             options(joinedload('splits')).filter(
             Transaction.post_date >= startdate,
             Transaction.post_date <= enddate
         ).all()
-        print("end transactions query")
 
-        print("start summarizing expenses..")
         splitcount = 0
         for t in transactions:
             for split in t.splits:
                 splitcount += 1
                 if (split.account.type == "EXPENSE"):
-                    # print(split.account.fullname)
-                    # print(split.value)
-                    accountname = split.account.fullname
+                    accountname = split.account.name
                     if accountname in expenses:
-                        # expenses[accountname] += split.value
                         expenses[accountname].addamount(split.value)
                     else:
-                        # expenses[accountname] = split.value
                         expenses[accountname] = Expense(accountname, split.value)
         print("end summarizing expenses..")
 

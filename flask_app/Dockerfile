@@ -6,7 +6,7 @@ COPY src/gnucashreports_settings.cfg /config/
 COPY src/requirements.txt /requirements/requirements.txt
 WORKDIR /requirements
 RUN pip3 install -r requirements.txt
-COPY src /app
+#COPY src /app
 #WORKDIR /app
 #ENTRYPOINT ["python3"]
 #CMD ["flask_app.py"]
