@@ -6,7 +6,8 @@ import flask.json
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from expensereport import ExpenseReport, PieCashConnectionManager, Expense
+from expensereport import ExpenseReport, Expense
+from PieCashConnectionManager import PieCashConnectionManager
 
 
 # api = Api(app)
