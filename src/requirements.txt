@@ -3,3 +3,4 @@ piecash==0.12.0
 Flask==0.12.1
 Flask-Restful
 flask-cors
+python-dateutil==2.6.0

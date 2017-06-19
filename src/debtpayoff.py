@@ -45,7 +45,7 @@ def main():
     # print(repr(lendingclub))
     # lendingclub.payoffschedule(300)
     cuofco = Loan(11300, 0.09, 36)
-    cuofco.payoffschedule(1300)
+    cuofco.payoffschedule(1350)
 
 
 if __name__ == '__main__':

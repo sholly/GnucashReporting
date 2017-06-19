@@ -42,7 +42,7 @@ class ExpenseReport():
         for t in transactions:
             for split in t.splits:
                 if split.account.type == "EXPENSE":
-                    accountname = split.account.name
+                    accountname = split.account.fullname
                     if accountname in expenses:
                         expenses[accountname].addamount(split.value)
                     else:
@@ -64,6 +64,13 @@ class ExpenseReport():
         if isinstance(o, decimal.Decimal):
             return str(o)
 
+def first_day_of_month(date):
+    first_day = date.replace(day=1)
+    return first_day
+
+def last_day_of_month(any_day):
+    next_month = any_day.replace(day=28) + datetime.timedelta(days=4)
+    return next_month - datetime.timedelta(days=next_month.day)
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
@@ -74,10 +81,10 @@ if __name__ == "__main__":
     print(connMgr.connString)
     expensereport = ExpenseReport(connMgr)
 
-    startdate = datetime.datetime.strptime("2012-04-01", "%Y-%m-%d")
+    startdate = datetime.datetime.strptime("2015-04-01", "%Y-%m-%d")
     enddate = datetime.datetime.today()
     expenses = expensereport.getexpenses(startdate, enddate)
 
     # print(json.dumps(expenses, cls=ExpenseEncoder, indent=4))
     for expense in expenses:
-        print(expense);
+        print(expense)
