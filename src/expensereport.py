@@ -42,7 +42,7 @@ class ExpenseReport():
         for t in transactions:
             for split in t.splits:
                 if split.account.type == "EXPENSE":
-                    accountname = split.account.fullname
+                    accountname = split.account.name
                     if accountname in expenses:
                         expenses[accountname].addamount(split.value)
                     else:
@@ -86,5 +86,6 @@ if __name__ == "__main__":
     expenses = expensereport.getexpenses(startdate, enddate)
 
     # print(json.dumps(expenses, cls=ExpenseEncoder, indent=4))
-    for expense in expenses:
-        print(expense)
+    # for expense in expenses:
+    #     print(expense)
+    print(type(expenses))

@@ -46,7 +46,7 @@ class DebtReport:
             sum += t[1].value
         print(accountname, ",", sum)
 
-    def sumovertime(self, accountname, startdate, enddate):
+    def sumforaccount(self, accountname, startdate, enddate):
         session = self.connMgr.getSession()
 
         things = session.query(Transaction, Split, Account). \
@@ -58,16 +58,32 @@ class DebtReport:
         monthdate = startdate
         enddatetz = enddate.replace(tzinfo=pytz.UTC)
         monthdate = monthdate.replace(tzinfo=pytz.UTC)
+        databymonth = {}
         while(monthdate < enddatetz):
-            # print(monthdate)
-            monthdate += relativedelta.relativedelta(months=1)
             sum = 0
             for t in things:
                 postdate = t[0].post_date
                 if postdate <= monthdate:
                     sum += t[1].value
-            print(monthdate, " , ", sum)
+            databymonth[str(monthdate)] = str(sum)
+            monthdate += relativedelta.relativedelta(months=1)
 
+        sum = 0
+        for t in things:
+            postdate = t[0].post_date
+            if postdate <= enddatetz:
+                sum += t[1].value
+            databymonth[str(enddate)] = str(sum)
+
+        return databymonth
+
+    def sumovertime(self, accountlist, startdate, enddate):
+        accountsdata = {}
+        for account in accountlist:
+            accountdata = self.sumforaccount(account, startdate, enddate)
+            accountsdata[account] = accountdata
+
+        return accountsdata
 
 
 
@@ -87,6 +103,14 @@ if __name__ == "__main__":
     # dr.accountsum("Nelnet Student Loan", datetime.datetime.today());
     # dr.accountsum("CU of CO Visa", datetime.datetime.strptime("2017-09-01", "%Y-%m-%d"));
     #dr.accountsum("CU of CO Visa", datetime.datetime.today());
-    startdate = datetime.datetime.strptime("2012-01-01", "%Y-%m-%d");
+    startdate = datetime.datetime.strptime("2014-02-01", "%Y-%m-%d");
     enddate = datetime.datetime.today()
-    dr.sumovertime("CU of CO Visa", startdate, enddate)
+    #data = dr.sumforaccount("CU of CO Visa", startdate, enddate)
+    accounts = ["Paypal", "Lending Club", "CU of CO Visa", "AES Student Loan", "CapOne Platinum"]
+    accountsdata = dr.sumovertime(accounts, startdate, enddate)
+
+    for k, v in accountsdata.items():
+        print(k)
+        for k1, v1 in v.items():
+            print(k1, v1)
+

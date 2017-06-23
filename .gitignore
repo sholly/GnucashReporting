@@ -1,4 +1,3 @@
 .idea/
-*.sql
 gnucashdata/
 __pycache__/

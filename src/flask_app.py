@@ -6,6 +6,7 @@ import flask.json
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from debtreport import DebtReport
 from expensereport import ExpenseReport, Expense
 from PieCashConnectionManager import PieCashConnectionManager
 
@@ -59,6 +60,19 @@ def get_expenses():
     else:
         enddate = datetime.datetime.today()
     return jsonify(expensereport.getexpenses(startdate, enddate))
+
+@app.route('/debt')
+def debtreport():
+
+    connmgr = PieCashConnectionManager(app.config['DB_USERNAME'],
+                                       app.config['DB_PASSWORD'],
+                                       app.config['DB_HOST'])
+    debtreport = DebtReport(connmgr)
+    startdate = datetime.datetime.strptime("2012-01-01", "%Y-%m-%d");
+    enddate = datetime.datetime.today()
+
+    accounts = ["CU of CO Visa", "Lending Club", "Paypal"]
+    return jsonify(debtreport.sumforaccount(accounts, startdate, enddate))
 
 
 # api.add_resource(Expenses, '/expensereport')
