@@ -58,30 +58,42 @@ class DebtReport:
         monthdate = startdate
         enddatetz = enddate.replace(tzinfo=pytz.UTC)
         monthdate = monthdate.replace(tzinfo=pytz.UTC)
-        databymonth = {}
+        databymontharray = []
         while(monthdate < enddatetz):
+            databymonth = {}
             sum = 0
             for t in things:
                 postdate = t[0].post_date
                 if postdate <= monthdate:
                     sum += t[1].value
-            databymonth[str(monthdate)] = str(sum)
+            # databymonth[str(monthdate)] = str(sum)
+            # databymontharray.push({})
+            databymonth["x"] = str(monthdate.date())
+            databymonth["y"] = float(abs(sum))
+            databymontharray.append(databymonth)
             monthdate += relativedelta.relativedelta(months=1)
 
         sum = 0
+        databymonth = {}
         for t in things:
             postdate = t[0].post_date
             if postdate <= enddatetz:
                 sum += t[1].value
-            databymonth[str(enddate)] = str(sum)
+            # databymonth[str(enddate)] = str(sum)
+        databymonth["x"] = str(enddate.date())
+        databymonth["y"] = float(abs(sum))
+        databymontharray.append(databymonth)
 
-        return databymonth
+        return databymontharray
 
     def sumovertime(self, accountlist, startdate, enddate):
-        accountsdata = {}
+        accountsdata = []
         for account in accountlist:
+            ad = {}
             accountdata = self.sumforaccount(account, startdate, enddate)
-            accountsdata[account] = accountdata
+            ad["key"] = account
+            ad["values"] = accountdata
+            accountsdata.append(ad)
 
         return accountsdata
 

@@ -68,11 +68,13 @@ def debtreport():
                                        app.config['DB_PASSWORD'],
                                        app.config['DB_HOST'])
     debtreport = DebtReport(connmgr)
-    startdate = datetime.datetime.strptime("2012-01-01", "%Y-%m-%d");
+    startdate = datetime.datetime.strptime("2013-01-01", "%Y-%m-%d");
     enddate = datetime.datetime.today()
 
-    accounts = ["CU of CO Visa", "Lending Club", "Paypal"]
-    return jsonify(debtreport.sumforaccount(accounts, startdate, enddate))
+    accounts = ["CU of CO Visa", "Lending Club", "Paypal Mastercard", "AMZN Chase Visa", "CapOne Platinum"]
+    # accounts = ["CU of CO Visa", "Lending Club", "Paypal Mastercard", "AMZN Chase Visa"]
+    # accounts = [ "CU of CO Visa", "Paypal Mastercard"]
+    return jsonify(debtreport.sumovertime(accounts, startdate, enddate))
 
 
 # api.add_resource(Expenses, '/expensereport')
