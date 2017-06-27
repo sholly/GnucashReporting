@@ -17,6 +17,11 @@ def firstdayofmonth():
     first_day = today.replace(day=1)
     return datetime.datetime.combine(first_day, datetime.datetime.min.time())
 
+def firstdayofyear():
+    today = datetime.datetime.today()
+    first_day = today.replace(day=1, month=1)
+    return datetime.datetime.combine(first_day, datetime.datetime.min.time())
+
 class DecimalJSONEncoder(flask.json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, decimal.Decimal):
@@ -67,11 +72,17 @@ def debtreport():
     connmgr = PieCashConnectionManager(app.config['DB_USERNAME'],
                                        app.config['DB_PASSWORD'],
                                        app.config['DB_HOST'])
+    if(request.args.get('startdate') is not None):
+        startdate = datetime.datetime.strptime(request.args.get('startdate'), "%Y-%m-%d")
+    else:
+        startdate = firstdayofyear()
+    if request.args.get('enddate') is not None:
+        enddate = datetime.datetime.strptime(request.args.get('enddate'), "%Y-%m-%d")
+    else:
+        enddate = datetime.datetime.today()
     debtreport = DebtReport(connmgr)
-    startdate = datetime.datetime.strptime("2013-01-01", "%Y-%m-%d");
-    enddate = datetime.datetime.today()
 
-    accounts = ["CU of CO Visa", "Lending Club", "Paypal Mastercard", "AMZN Chase Visa", "CapOne Platinum"]
+    accounts = ["CU of CO Visa", "Lending Club", "Paypal Mastercard", "AMZN Chase Visa", "CapOne Platinum", "CapOne Quicksilver", "Car Loan CUofCO"]
     # accounts = ["CU of CO Visa", "Lending Club", "Paypal Mastercard", "AMZN Chase Visa"]
     # accounts = [ "CU of CO Visa", "Paypal Mastercard"]
     return jsonify(debtreport.sumovertime(accounts, startdate, enddate))
